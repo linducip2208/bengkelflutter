@@ -108,10 +108,7 @@ class PhotoRemote {
       ApiPaths.serviceImages(serviceId),
       'image',
       filePath,
-      fields: {
-        'type': ?type,
-        'caption': ?caption,
-      },
+      fields: {'type': ?type, 'caption': ?caption},
     );
     final m = r.data as Map<String, dynamic>;
     return (m['data'] as Map<String, dynamic>)['url'] as String;

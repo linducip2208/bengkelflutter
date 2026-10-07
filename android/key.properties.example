@@ -1,0 +1,5 @@
+# JANGAN commit key.properties asli. Copy file ini → key.properties lalu isi.
+# storeFile=/path/ke/bengkel-release.jks
+storePassword=****
+keyAlias=bengkel
+keyPassword=****

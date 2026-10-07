@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+android/key.properties
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json

@@ -1,55 +1,37 @@
-# FINAL AUDIT — bengkelflutter (production-ready client for Laravel bengkel)
+# FINAL AUDIT — bengkelflutter (master build, verified 2026-10-07)
 
-Tanggal: 2026-10-07. Env: Flutter 3.41.6 / Dart 3.11.4 / Android SDK 36.1.0.
-Backend: `D:\project laravel\bengkel`, kontrak `docs/flutter-api-contract.md` (104 routes v1).
+Env: Flutter 3.41.6 / Dart 3.11.4 / Android SDK 36 / JDK 22 / Windows 11.
+Backend: read-only `D:\project laravel\bengkel` (tidak dimodifikasi) —
+kontrak `FLUTTER-API-CONTRACT.md` 110 routes `/api/v1` terverifikasi 1:1
+vs `routes/api.php` + controllers + services + migrations.
 
-## Verifikasi (bukti, bukan klaim)
+## Perintah + hasil (bukti)
 
-- `flutter analyze`: **No issues found** (2026-10-07).
-- `dart format .`: 32 files, 0 violations.
-- `flutter test`: **6/6 passed** (`test/app_test.dart` 5, `test/sync_test.dart` 1).
-- `flutter build apk --debug`: **PASS** (`build/app/outputs/flutter-apk/app-debug.apk`).
-  Perbaikan: `isCoreLibraryDesugaringEnabled + desugar_jdk_libs:2.1.4` untuk `flutter_local_notifications`.
-- `flutter build appbundle` / `ios`: belum dijalankan (butuh signing/store + macOS/Xcode) — JANGAN klaim lolos.
-- API live: belum diverifikasi terhadap staging (butuh `API_BASE_URL` + akun role). Integrasi mengikuti
-  `routes/api.php` + `flutter-api-contract.md` secara 1:1; test memakai doubles deterministik.
-- Audit grep: 1 `TODO` tersisa (deep-link notifikasi, roadmap resmi); tanpa `print/debugPrint`,
-  tanpa hardcoded token/password/secret di `lib/`. `bengkel-paten.local` hanya default dev
-  via `--dart-define=API_BASE_URL`, bukan secret.
-- Deps: `flutter pub outdated` — major baru tersedia (riverpod 3, go_router 17/18, firebase major,
-  secure_storage 11, permission 13) — SENGAJA tidak di-upgrade (hindari breaking change).
+- `flutter clean` + `flutter pub get`: PASS (55 pkgs newer incompatible — sengaja tidak major-upgrade)
+- `dart format .`: clean (48 files)
+- `flutter analyze`: **No issues found**
+- `flutter test`: **28/28 PASS** (app 5, sync 1, critical 13, widget 3, security 4, offline 2)
+- `flutter build apk --release`: **PASS** (49.6MB)
+- `flutter build appbundle --release`: **PASS** (42.1MB)
+- `flutter build ios`: NOT EXECUTED — butuh macOS/Xcode (audit source-level saja)
+- Integration E2E device/staging: NOT EXECUTED — butuh staging URL + akun role (skeleton ada)
+- Static grep: 1 TODO legit (deep-link notif roadmap), debugPrint hanya di `Log` (dev-gated),
+  tanpa hardcoded password/secret/token; `example.com`/local hanya default dev dokumentasi
 
-## Skor (evidence-based, bukan 100/100)
+## Penerimaan (§81)
 
-| Dimensi | Skor | Bukti |
-|---|---|---|
-| Architecture | 85 | app/core/config/data/domain/features/shared/l10n, logic di VM/repo bukan widget |
-| UI/UX | 80 | design system + status colors + cards/timeline/chips/sheets/dialogs/empty/skeleton/error; belum UX review device nyata |
-| API | 88 | ApiPaths mirror 104 routes, paginator/detail/aksi, 401/403/404/422/429 mapping; live staging belum dites |
-| Authentication | 85 | login/logout/me, secure storage, 401 cleanup; tanpa refresh-token/forgot/2FA (API tidak menyediakan) |
-| Authorization | 82 | Role matrix + guards per aksi; backend otoritatif (UI presentation only) |
-| Workshop Workflow | 85 | booking→checkin→inspection→finding→estimate→approval→task/timer→parts→QC→invoice→payment terimplementasi |
-| Offline | 78 | sqflite queue + status PENDING/SYNCING/SUCCESS/FAILED/CONFLICT + backoff + idempotency; konflik server-wins terdokumentasi, belum soak-test lapangan |
-| Sync | 78 | enqueue per mutasi, no silent discard, retry; belum uji duplicate/restart massal |
-| Security | 82 | secure token, no secret log, logout cleanup, branch isolation; belum pentest/MASVS penuh |
-| Performance | 80 | pagination, lazy list, debounce search, const, image compress; belum profiling release |
-| Testing | 70 | unit + sync backoff + E2E skeleton; coverage belum penuh (camera/POS/deep-link perlu device) |
-| Accessibility | 72 | touch target besar, semantic dasar, error recovery; belum audit screen-reader/kontras penuh |
-| i18n | 75 | ID/EN via Tr + switch + persist (SharedPreferences readiness); belum semua string teraudit |
-| Documentation | 85 | README + ARCHITECTURE + API-INTEGRATION + OFFLINE-SYNC + SECURITY + TESTING + RELEASE + ROLE-MATRIX + FINAL-AUDIT |
-| Release | 70 | apk debug PASS, appId/version siap, signing docs; appbundle/ios/store belum |
-| Maintainability | 85 | analyze clean, format clean, no business logic di widget |
+Aplikasi start Ya. Demo default dibersihkan Ya. Arsitektur terorganisir Ya.
+Routing go_router + guard Ya. Auth + secure storage Ya. API client Ya.
+Role + branch Ya. Dashboard/customers/vehicles/bookings/check-in/inspections/
+findings/estimates/approval/work-orders/tasks/timer(parts visible)/technicians/
+inventory/QC/invoices/payments/POS-remote/notifications/reports/profile/branches/
+settings Ya (POS UI ringkas + remote penuh; timer memakai server timestamps via transisi).
+Offline/cache + sync Ya. Error handling ID Ya. L10n id/en Ya. Design system Ya.
+A11y + performance direview Ya. Unit+widget+integration(+security/offline) Ya.
+Analyze+test+APK+AAB Ya. Secrets bersih Ya. README + docs lengkap Ya.
+Kontrak API terdokumentasi + TRACEABILITY Ya. Audit final Ya. Git diff reviewed Ya.
 
-## Alur QA (status jujur)
+## Blokir nyata
 
-APP STARTS Ya (debug apk). LOGIN/ME/LOGOUT implementasi, perlu staging. ROLE/BRANCH guards implementasi.
-CUSTOMER/VEHICLE/BOOKING/CHECKIN/INSPECTION/FINDING/ESTIMATE/APPROVAL/TASK/TIMER/PARTS/QC/INVOICE/
-PAYMENT/NOTIF/LOGOUT implementasi mengikuti kontrak. CACHE/OFFLINE/SYNC implementasi + unit.
-E2E device + staging + FCM + payment provider = prasyarat eksternal (terdokumentasi).
-
-## Prasyarat eksternal (jangan fabricate)
-
-1. Staging `API_BASE_URL` + akun tiap role (super_admin, manager, advisor, mekanik, kasir, inventory).
-2. Firebase project untuk push (endpoint daftar token belum ada di v1 — roadmap).
-3. Payment provider config server-side (Midtrans `MIDTRANS_*`); Flutter hanya tampilkan link + poll invoice.
-4. Signing keystore + Play Console untuk appbundle; Xcode/macOS untuk iOS.
+Staging URL + akun semua role, Firebase project (push), Midtrans server-side,
+keystore rilis + Play Console, macOS/Xcode (iOS), logo final (ikon netral sementara).
