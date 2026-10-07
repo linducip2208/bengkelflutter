@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/providers.dart';
+import '../../../core/utils/format.dart';
 import '../../../domain/entities/roles.dart';
 import '../../../shared/widgets/components.dart';
+import '../pdf_button.dart';
 
 /// Invoice: number customer vehicle items parts labor discount tax total paid remaining status.
 /// PDF via GET /invoices/{id}/pdf. Payment idempotent di halaman payment.
@@ -32,6 +34,7 @@ class InvoicesPage extends ConsumerWidget {
             itemCount: items.length,
             itemBuilder: (_, i) {
               final v = items[i];
+              final id = (v['id'] as num).toInt();
               return AppCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,18 +43,16 @@ class InvoicesPage extends ConsumerWidget {
                       'INV-${v['number'] ?? v['id']} • ${v['payment_status'] ?? v['status'] ?? ''}',
                     ),
                     Text(
-                      'Total ${v['total'] ?? '-'} • Paid ${v['paid_amount'] ?? v['paid'] ?? 0}',
+                      'Total ${Fmt.idr((v['grand_total'] ?? v['total']) as num?)} • Paid ${Fmt.idr((v['paid_amount'] ?? v['paid']) as num?)}',
                     ),
                     Row(
                       children: [
-                        TextButton(onPressed: () {}, child: const Text('PDF')),
+                        InvoicePdfButton(invoiceId: id),
                         if (Roles.canPay(roles))
                           TextButton(
                             onPressed: () => showDialog<void>(
                               context: context,
-                              builder: (_) => _PayDialog(
-                                invoiceId: (v['id'] as num).toInt(),
-                              ),
+                              builder: (_) => _PayDialog(invoiceId: id),
                             ),
                             child: const Text('Bayar'),
                           ),

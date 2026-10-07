@@ -15,6 +15,10 @@ import '../features/tasks/presentation/tasks_page.dart';
 import '../features/vehicles/presentation/vehicles_page.dart';
 import '../features/approvals/approvals_page.dart';
 import '../features/workorders/workorders_page.dart';
+import '../features/suppliers/suppliers_page.dart';
+import '../features/purchases/purchases_page.dart';
+import '../features/warranty/warranty_page.dart';
+import '../features/workpackages/workpackages_page.dart';
 import '../features/misc/ops_pages.dart';
 import '../features/misc/account_pages.dart';
 import 'app.dart';
@@ -74,6 +78,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, _) => const TechniciansPage(),
           ),
           GoRoute(path: '/inventory', builder: (_, _) => const InventoryPage()),
+          GoRoute(path: '/suppliers', builder: (_, _) => const SuppliersPage()),
+          GoRoute(path: '/purchases', builder: (_, _) => const PurchasesPage()),
+          GoRoute(path: '/warranty', builder: (_, _) => const WarrantyPage()),
+          GoRoute(
+            path: '/work-packages',
+            builder: (_, _) => const WorkPackagesPage(),
+          ),
           GoRoute(path: '/qc', builder: (_, _) => const QcQueuePage()),
           GoRoute(path: '/invoices', builder: (_, _) => const InvoicesPage()),
           GoRoute(path: '/payments', builder: (_, _) => const PaymentsPage()),
