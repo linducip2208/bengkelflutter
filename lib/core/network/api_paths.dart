@@ -1,0 +1,56 @@
+// Mirror routes/api.php prefix /api/v1. Kode menang atas docs jika konflik.
+// ignore_for_file: avoid_classes_with_only_static_members
+abstract final class ApiPaths {
+  static const login = '/login';
+  static const logout = '/logout';
+  static const me = '/me';
+  static const health = '/health';
+  static const dashboardStats = '/dashboard/stats';
+  static const masterData = '/master-data';
+  static const branches = '/branches';
+  static const notifications = '/notifications';
+  static const customers = '/customers';
+  static String customer(int id) => '/customers/$id';
+  static const vehicles = '/vehicles';
+  static String vehicle(int id) => '/vehicles/$id';
+  static const services = '/services';
+  static String serviceComplete(int id) => '/services/$id/complete';
+  static String inspections(int id) => '/services/$id/inspections';
+  static const jobcards = '/jobcards';
+  static String jobcardComplete(int id) => '/jobcards/$id/complete';
+  static const bookings = '/bookings';
+  static String bookingConvert(int id) => '/bookings/$id/convert';
+  static const estimates = '/estimates';
+  static String estimate(int id) => '/estimates/$id';
+  static String estimateApprove(int id) => '/estimates/$id/approve';
+  static String estimateReject(int id) => '/estimates/$id/reject';
+  static String estimateDecide(int id) => '/estimates/$id/decide';
+  static String estimateConvert(int id) => '/estimates/$id/convert';
+  static const workPackages = '/work-packages';
+  static String workPackageQc(int id) => '/work-packages/$id/qc';
+  static const workTasks = '/work-tasks';
+  static String taskStart(int id) => '/work-tasks/$id/start';
+  static String taskPause(int id) => '/work-tasks/$id/pause';
+  static String taskFinish(int id) => '/work-tasks/$id/finish';
+  static const findings = '/findings';
+  static const technicians = '/technicians';
+  static const invoices = '/invoices';
+  static String invoice(int id) => '/invoices/$id';
+  static String invoicePdf(int id) => '/invoices/$id/pdf';
+  static String invoicePay(int id) => '/invoices/$id/payments';
+  static const products = '/products';
+  static String productStockAdjust(int id) => '/products/$id/stock-adjust';
+  static const purchases = '/purchases';
+  static String purchaseReceive(int id) => '/purchases/$id/receive';
+  static const sales = '/sales';
+  static const suppliers = '/suppliers';
+  static const posOpen = '/pos/open';
+  static const posClose = '/pos/close';
+  static const posCheckout = '/pos/checkout';
+  static const commissions = '/commissions';
+  static const warrantyClaims = '/warranty-claims';
+  static const reportService = '/reports/service';
+  static const reportSales = '/reports/sales';
+  static const reportStock = '/reports/stock';
+  static const reportFinancial = '/reports/financial';
+}
