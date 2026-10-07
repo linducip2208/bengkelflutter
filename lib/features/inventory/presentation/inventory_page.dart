@@ -38,12 +38,19 @@ class InventoryPage extends ConsumerWidget {
                   trailing: Roles.canManageStock(roles)
                       ? IconButton(
                           icon: const Icon(Icons.inventory),
+                          // Server: StockService locked; body WAJIB
+                          // {quantity, type: add|subtract|set, notes?}.
+                          // Stok negatif ditolak 422; jangan optimistis.
                           onPressed: () => ref
                               .read(apiProvider)
                               .dio
                               .post(
                                 R.productStockAdjust((p['id'] as num).toInt()),
-                                data: {'qty': 1},
+                                data: {
+                                  'quantity': 1,
+                                  'type': 'add',
+                                  'notes': 'adjust dari mobile',
+                                },
                               ),
                         )
                       : null,

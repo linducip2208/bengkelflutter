@@ -80,6 +80,11 @@ class _PayDialog extends ConsumerStatefulWidget {
 class _P extends ConsumerState<_PayDialog> {
   final amount = TextEditingController();
   final method = TextEditingController(text: '1');
+  final date = TextEditingController(
+    text: DateTime.now().toIso8601String().substring(0, 10),
+  );
+  final reference = TextEditingController();
+  final notes = TextEditingController();
   String? err;
   @override
   Widget build(BuildContext context) => AlertDialog(
@@ -98,6 +103,12 @@ class _P extends ConsumerState<_PayDialog> {
           label: 'payment_method_id',
           keyboard: TextInputType.number,
         ),
+        const SizedBox(height: 8),
+        AppInput(controller: date, label: 'payment_date YYYY-MM-DD'),
+        const SizedBox(height: 8),
+        AppInput(controller: reference, label: 'reference_number (opsional)'),
+        const SizedBox(height: 8),
+        AppInput(controller: notes, label: 'notes (opsional)'),
         if (err != null) Text(err!, style: const TextStyle(color: Colors.red)),
       ],
     ),
@@ -108,6 +119,8 @@ class _P extends ConsumerState<_PayDialog> {
       ),
       FilledButton(
         onPressed: () async {
+          // Server: PaymentService::process — amount ≤ sisa, lockForUpdate,
+          // idempotency_key mengembalikan record sama (anti dobel).
           try {
             await ref
                 .read(apiProvider)
@@ -115,10 +128,16 @@ class _P extends ConsumerState<_PayDialog> {
                 .post(
                   R.invoicePay(widget.invoiceId),
                   data: {
-                    'amount': int.parse(amount.text),
+                    'amount': num.parse(amount.text),
                     'payment_method_id': int.parse(method.text),
+                    'payment_date': date.text, // WAJIB: required|date
+                    if (reference.text.isNotEmpty)
+                      'reference_number': reference.text,
+                    if (notes.text.isNotEmpty) 'notes': notes.text,
                     'idempotency_key': newIdempotencyKey(),
                   },
+                  // Server juga menerima header Idempotency-Key sebagai fallback.
+                  options: null,
                 );
             if (context.mounted) Navigator.pop(context);
           } catch (e) {

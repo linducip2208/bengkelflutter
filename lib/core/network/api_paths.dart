@@ -13,9 +13,16 @@ abstract final class ApiPaths {
   static String customer(int id) => '/customers/$id';
   static const vehicles = '/vehicles';
   static String vehicle(int id) => '/vehicles/$id';
+  static String vehicleImages(int id) => '/vehicles/$id/images';
+  static String vehicleImage(int id, int imageId) =>
+      '/vehicles/$id/images/$imageId';
   static const services = '/services';
   static String serviceComplete(int id) => '/services/$id/complete';
   static String inspections(int id) => '/services/$id/inspections';
+  static String serviceImages(int id) => '/services/$id/images';
+  static String serviceImage(int id, int imageId) =>
+      '/services/$id/images/$imageId';
+  static const deviceTokens = '/device-tokens';
   static const jobcards = '/jobcards';
   static String jobcardComplete(int id) => '/jobcards/$id/complete';
   static const bookings = '/bookings';

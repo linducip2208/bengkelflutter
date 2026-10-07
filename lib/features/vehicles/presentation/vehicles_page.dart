@@ -38,11 +38,13 @@ class _VehiclesState extends ConsumerState<VehiclesPage> {
             itemCount: items.length,
             itemBuilder: (_, i) {
               final v = items[i];
+              // Server fields: number_plate, chassis_number, engine_number,
+              // odometer, model_name, model_year (+ customer, vehicleType...).
               return AppCard(
                 child: ListTile(
-                  title: Text('${v['plate_number'] ?? v['plate'] ?? '-'}'),
+                  title: Text('${v['number_plate'] ?? '-'}'),
                   subtitle: Text(
-                    'VIN ${v['vin'] ?? '-'} • ${v['brand'] ?? ''} ${v['model'] ?? ''} ${v['year'] ?? ''} • odo ${v['mileage'] ?? v['odometer'] ?? '-'}',
+                    'Rangka ${v['chassis_number'] ?? '-'} • Mesin ${v['engine_number'] ?? '-'} • odo ${v['odometer'] ?? '-'}',
                   ),
                 ),
               );
@@ -65,38 +67,82 @@ class _VehicleForm extends ConsumerStatefulWidget {
 }
 
 class _VF extends ConsumerState<_VehicleForm> {
+  final customerId = TextEditingController();
+  final typeId = TextEditingController();
+  final brandId = TextEditingController();
+  final fuelId = TextEditingController();
   final plate = TextEditingController();
-  final vin = TextEditingController();
-  final mileage = TextEditingController();
+  final chassis = TextEditingController();
+  final engine = TextEditingController();
+  final odo = TextEditingController();
+  String? err;
   @override
   Widget build(BuildContext context) => Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      AppInput(controller: plate, label: 'Plat nomor'),
-      const SizedBox(height: 8),
-      AppInput(controller: vin, label: 'VIN / rangka'),
-      const SizedBox(height: 8),
+      // Server WAJIB: customer_id, vehicle_type_id, vehicle_brand_id,
+      // fuel_type_id, number_plate. Lihat ApiVehicleController@store.
       AppInput(
-        controller: mileage,
-        label: 'Mileage',
+        controller: customerId,
+        label: 'customer_id',
         keyboard: TextInputType.number,
       ),
+      const SizedBox(height: 8),
+      AppInput(
+        controller: typeId,
+        label: 'vehicle_type_id',
+        keyboard: TextInputType.number,
+      ),
+      const SizedBox(height: 8),
+      AppInput(
+        controller: brandId,
+        label: 'vehicle_brand_id',
+        keyboard: TextInputType.number,
+      ),
+      const SizedBox(height: 8),
+      AppInput(
+        controller: fuelId,
+        label: 'fuel_type_id',
+        keyboard: TextInputType.number,
+      ),
+      const SizedBox(height: 8),
+      AppInput(controller: plate, label: 'number_plate'),
+      const SizedBox(height: 8),
+      AppInput(controller: chassis, label: 'chassis_number (opsional)'),
+      const SizedBox(height: 8),
+      AppInput(controller: engine, label: 'engine_number (opsional)'),
+      const SizedBox(height: 8),
+      AppInput(
+        controller: odo,
+        label: 'odometer',
+        keyboard: TextInputType.number,
+      ),
+      if (err != null) Text(err!, style: const TextStyle(color: Colors.red)),
       const SizedBox(height: 12),
       AppButton(
         label: 'Simpan',
         onPressed: () async {
-          await ref
-              .read(apiProvider)
-              .dio
-              .post(
-                R.vehicles,
-                data: {
-                  'plate_number': plate.text,
-                  'vin': vin.text,
-                  'mileage': mileage.text,
-                },
-              );
-          if (context.mounted) Navigator.pop(context);
+          try {
+            await ref
+                .read(apiProvider)
+                .dio
+                .post(
+                  R.vehicles,
+                  data: {
+                    'customer_id': int.parse(customerId.text),
+                    'vehicle_type_id': int.parse(typeId.text),
+                    'vehicle_brand_id': int.parse(brandId.text),
+                    'fuel_type_id': int.parse(fuelId.text),
+                    'number_plate': plate.text,
+                    if (chassis.text.isNotEmpty) 'chassis_number': chassis.text,
+                    if (engine.text.isNotEmpty) 'engine_number': engine.text,
+                    if (odo.text.isNotEmpty) 'odometer': int.parse(odo.text),
+                  },
+                );
+            if (context.mounted) Navigator.pop(context);
+          } catch (e) {
+            setState(() => err = '$e');
+          }
         },
       ),
     ],

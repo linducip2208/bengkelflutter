@@ -15,9 +15,13 @@ class CheckinSheet extends ConsumerStatefulWidget {
 }
 
 class _C extends ConsumerState<CheckinSheet> {
-  final mileage = TextEditingController();
-  final complaint = TextEditingController();
-  final notes = TextEditingController();
+  final customerId = TextEditingController();
+  final vehicleId = TextEditingController();
+  final title = TextEditingController();
+  final serviceDate = TextEditingController(
+    text: DateTime.now().toIso8601String().substring(0, 10),
+  );
+  final description = TextEditingController();
   XFile? photo;
   String? err;
 
@@ -47,15 +51,26 @@ class _C extends ConsumerState<CheckinSheet> {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Server WAJIB (ApiJobcardController@store):
+        // customer_id, vehicle_id, title, service_date.
+        // done_status system-managed, tidak dikirim dari client.
         AppInput(
-          controller: mileage,
-          label: 'Mileage',
+          controller: customerId,
+          label: 'customer_id',
           keyboard: TextInputType.number,
         ),
         const SizedBox(height: 8),
-        AppInput(controller: complaint, label: 'Keluhan'),
+        AppInput(
+          controller: vehicleId,
+          label: 'vehicle_id',
+          keyboard: TextInputType.number,
+        ),
         const SizedBox(height: 8),
-        AppInput(controller: notes, label: 'Catatan'),
+        AppInput(controller: title, label: 'Judul pekerjaan'),
+        const SizedBox(height: 8),
+        AppInput(controller: serviceDate, label: 'service_date YYYY-MM-DD'),
+        const SizedBox(height: 8),
+        AppInput(controller: description, label: 'Deskripsi / keluhan'),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -86,9 +101,12 @@ class _C extends ConsumerState<CheckinSheet> {
                   .post(
                     R.jobcards,
                     data: {
-                      'mileage': mileage.text,
-                      'complaint': complaint.text,
-                      'notes': notes.text,
+                      'customer_id': int.parse(customerId.text),
+                      'vehicle_id': int.parse(vehicleId.text),
+                      'title': title.text,
+                      'service_date': serviceDate.text,
+                      if (description.text.isNotEmpty)
+                        'description': description.text,
                     },
                   );
               if (context.mounted) Navigator.pop(context);

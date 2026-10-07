@@ -72,3 +72,114 @@ class GenericRemote {
     return unwrapData(r.data as Map<String, dynamic>);
   }
 }
+
+/// Foto kendaraan & service — multipart `image` (jpeg|png|webp ≤5MB).
+/// Upload: +mekanik. Hapus via parent scope (lintas cabang → 404).
+/// Response: {message, data: {url absolut, ...}}.
+class PhotoRemote {
+  PhotoRemote(this._api);
+  final ApiClient _api;
+
+  Future<String> uploadVehicleImage(
+    int vehicleId,
+    String filePath, {
+    String? caption,
+  }) async {
+    final r = await _api.upload(
+      ApiPaths.vehicleImages(vehicleId),
+      'image',
+      filePath,
+      fields: {'caption': ?caption},
+    );
+    final m = r.data as Map<String, dynamic>;
+    return (m['data'] as Map<String, dynamic>)['url'] as String;
+  }
+
+  Future<void> deleteVehicleImage(int vehicleId, int imageId) =>
+      _api.delete(ApiPaths.vehicleImage(vehicleId, imageId));
+
+  Future<String> uploadServiceImage(
+    int serviceId,
+    String filePath, {
+    String? type,
+    String? caption,
+  }) async {
+    final r = await _api.upload(
+      ApiPaths.serviceImages(serviceId),
+      'image',
+      filePath,
+      fields: {
+        'type': ?type,
+        'caption': ?caption,
+      },
+    );
+    final m = r.data as Map<String, dynamic>;
+    return (m['data'] as Map<String, dynamic>)['url'] as String;
+  }
+
+  Future<void> deleteServiceImage(int serviceId, int imageId) =>
+      _api.delete(ApiPaths.serviceImage(serviceId, imageId));
+}
+
+/// Push-ready: token FCM per device, idempoten per (user_id, token).
+/// Tabel: fleet_notification_tokens. Hapus hanya milik sendiri.
+class DeviceTokenRemote {
+  DeviceTokenRemote(this._api);
+  final ApiClient _api;
+
+  Future<void> register(String token, {String? platform}) => _api.post(
+    ApiPaths.deviceTokens,
+    data: {'token': token, 'platform': ?platform},
+  );
+
+  Future<void> unregister(String token) =>
+      _api.delete(ApiPaths.deviceTokens, data: {'token': token});
+}
+
+/// POS — server otoritatif penuh (PosService::checkout).
+/// open: {opening_balance, branch_id}. close: {closing_balance}.
+/// checkout WAJIB: {session_id, items[{product_id, quantity, ...}],
+/// amount_paid, payment_method_id, idempotency_key?}.
+/// Diskon/override harga butuh role admin/manager (403 bila tidak).
+class PosRemote {
+  PosRemote(this._api);
+  final ApiClient _api;
+
+  Future<Map<String, dynamic>> open(double openingBalance, int branchId) async {
+    final r = await _api.post(
+      ApiPaths.posOpen,
+      data: {'opening_balance': openingBalance, 'branch_id': branchId},
+    );
+    return r.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> checkout({
+    required int sessionId,
+    required List<Map<String, dynamic>> items,
+    required num amountPaid,
+    required int paymentMethodId,
+    String? idempotencyKey,
+  }) async {
+    final r = await _api.post(
+      ApiPaths.posCheckout,
+      data: {
+        'session_id': sessionId,
+        'items': items,
+        'amount_paid': amountPaid,
+        'payment_method_id': paymentMethodId,
+        'idempotency_key': ?idempotencyKey,
+      },
+    );
+    return r.data as Map<String, dynamic>;
+  }
+}
+
+/// Health publik: {status ok|degraded|error, checks{database,cache,queue,failed_jobs?}, app, time}.
+class HealthRemote {
+  HealthRemote(this._api);
+  final ApiClient _api;
+  Future<Map<String, dynamic>> check() async {
+    final r = await _api.get(ApiPaths.health);
+    return r.data as Map<String, dynamic>;
+  }
+}
